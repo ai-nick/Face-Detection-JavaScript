@@ -10,22 +10,23 @@
       background: #333;
       height: 100vh;
       margin: 0;
+      overflow: hidden;
       padding: 0;
       width: 100vw;
     }
 
     video {
-      bottom: 0;
-      left: 0;
+      height: 100%;
       position: absolute;
-      right: 0;
       top: 0;
       z-index: 1;
     }
 
     .emojibox {
-      font-size: 14vh;
+      font-size: 22vh;
       left: 0;
+      line-height: 1;
+      outline: 2px solid fuchsia;
       position: absolute;
       top: 0;
       z-index: 10;
@@ -33,111 +34,8 @@
   </style>
 </head>
 <body>
-  <video id="webcam" width="100%" height="100%" autoplay muted></video>
-  <!-- <img id="expression_emoji" src="images/neutral.png" hidden> -->
-  <span id="emoji_box" class="emojibox"></span>
-
+  <video id="webcam" autoplay muted></video>
   <script src="scripts/face-api.min.js"></script>
-  <script type="module">
-    let animationTimer = null;
-    let faceDetectionSupported = false;
-
-    const video = document.getElementById('webcam');
-    const emoji_img = document.getElementById('expression_emoji');
-    const emojiBox = document.getElementById('emoji_box');
-
-    const emojiMap = {
-      happy: '😄',
-      sad: '😭',
-      surprised: '😯',
-      angry: '😡',
-      fearful: '😱',
-      neutral: '🎃',
-      disgusted: '🤢'
-    }
-
-    function showEmoji(expression, x = 0, y = 0, height = 100) {
-      const emoji = emojiMap[expression] || emojiMap.neutral;
-      const fontSize = height / 10;
-
-      emojiBox.innerHTML = emoji;
-      emojiBox.style.top = `${x}px`;
-      emojiBox.style.left = `${y}px`;
-      emojiBox.style.fontSize = `${fontSize}vh`;
-    }
-
-    function animateFace() {
-      animationTimer = requestAnimationFrame(async () => {
-        if (faceDetectionSupported) {
-          const detections = await faceapi.detectAllFaces(video, new faceapi.TinyFaceDetectorOptions()).withFaceLandmarks().withFaceExpressions()
-          //const resizedDetections = faceapi.resizeResults(detections, displaySize)
-          console.log(detections[0]["expressions"].asSortedArray()[0].expression)
-          const highest_prob = detections[0]["expressions"].asSortedArray()[0].expression
-          //const emotions = detections[0]["expressions"];
-          // emoji_img.src = emotion_dict[highest_prob]
-          showEmoji(highest_prob, 0, 0);
-        } else {
-          showEmoji('happy', 0, 0);
-        }
-
-        animateFace();
-      });
-    }
-
-    function startVideo() {
-      navigator.mediaDevices.getUserMedia({ audio: false, video: { facingMode: 'user' } }).then(stream => video.srcObject = stream).catch(err => console.error(err))
-    }
-
-    function everythingWorked() {
-      faceDetectionSupported = true;
-      showEmoji('neutral', 0, 0);
-      startVideo();
-    }
-
-    function somethingFailed(reason) {
-      console.error(reason);
-      faceDetectionSupported = false;
-      startVideo();
-    }
-
-    video.addEventListener('play', animateFace);
-    video.addEventListener('pause', () => cancelAnimationFrame(animationTimer));
-    video.addEventListener('error', () => cancelAnimationFrame(animationTimer));
-
-    Promise.all([
-      faceapi.nets.tinyFaceDetector.loadFromUri('./models'),
-      faceapi.nets.faceLandmark68Net.loadFromUri('./models'),
-      faceapi.nets.faceRecognitionNet.loadFromUri('./models'),
-      faceapi.nets.faceExpressionNet.loadFromUri('./models')
-    ]).then(everythingWorked).catch(somethingFailed);
-
-    /*
-    video.addEventListener('play', () => {
-      const canvas = faceapi.createCanvasFromMedia(video)
-      document.body.append(canvas)
-      const displaySize = { width: video.width, height: video.height }
-      faceapi.matchDimensions(canvas, displaySize)
-      setInterval(async () => {
-        const detections = await faceapi.detectAllFaces(video, new faceapi.TinyFaceDetectorOptions()).withFaceLandmarks().withFaceExpressions()
-        const resizedDetections = faceapi.resizeResults(detections, displaySize)
-        console.log(resizedDetections.expressions)
-        canvas.getContext('2d').clearRect(0, 0, canvas.width, canvas.height)
-        faceapi.draw.drawDetections(canvas, resizedDetections)
-        faceapi.draw.drawFaceLandmarks(canvas, resizedDetections)
-        faceapi.draw.drawFaceExpressions(canvas, resizedDetections)
-      }, 100)
-    })
-    */
-
-    // const emotion_dict = {
-    //   'happy': "images/happy.png",
-    //   'sad': "images/sad.png",
-    //   "surprised": "images/surprised.png",
-    //   "angry": "images/angry.png",
-    //   "fearful": "images/fearful.png",
-    //   "neutral": "images/neutral.png",
-    //   "disgusted": "images/disgusted.png"
-    // }
-  </script>
+  <script src="scripts/app.js"></script>
 </body>
 </html>
