@@ -18,8 +18,9 @@ const emojiMap = {
 
 const faceDetector = new faceapi.TinyFaceDetectorOptions();
 
-function showEmoji(index, expression, x = 0, y = 0, height = 100) {
+function showEmoji(index, expression, x = 0, y = 0, height, width) {
     const emoji = emojiMap[expression] || emojiMap.neutral;
+    const topAdjustment = 0;
     const fontSize = height / 10;
 
     let emojiBox = emojiBoxes[index];
@@ -33,8 +34,10 @@ function showEmoji(index, expression, x = 0, y = 0, height = 100) {
     }
 
     emojiBox.innerHTML = emoji;
-    emojiBox.style.top = `${y}px`;
+    emojiBox.style.top = `${y - topAdjustment}px`;
     emojiBox.style.left = `${x}px`;
+    emojiBox.style.width = `${width}px`;
+    emojiBox.style.height = `${height}px`;
     emojiBox.style.fontSize = `${fontSize}vh`;
 }
 
@@ -69,11 +72,9 @@ function animateFace() {
                     const emotion = face.expressions.asSortedArray()[0].expression || '';
                     const box = face.detection.box;
 
-                    showEmoji(index, emotion, box.left, box.top, box.height);
+                    showEmoji(index, emotion, box.left + videoSize.left, box.top, box.height, box.width);
                 });
             }
-        } else {
-            showEmoji(0, 'happy', 0, 0);
         }
 
         animateFace();
