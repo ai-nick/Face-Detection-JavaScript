@@ -69,10 +69,11 @@ function animateFace() {
                 });
 
                 faces.forEach((face, index) => {
-                    const emotion = face.expressions.asSortedArray()[0].expression || '';
+                    const emotion = face.expressions.asSortedArray()[0];
+                    const expression = emotion.probability > .5 ? emotion.expression : '';
                     const box = face.detection.box;
 
-                    showEmoji(index, emotion, box.left + videoSize.left, box.top, box.height, box.width);
+                    showEmoji(index, expression, box.left + videoSize.left, box.top, box.height, box.width);
                 });
             }
         }
@@ -102,7 +103,7 @@ video.addEventListener('error', () => cancelAnimationFrame(animationTimer));
 
 Promise.all([
     faceapi.nets.tinyFaceDetector.loadFromUri('./models'),
-    faceapi.nets.faceLandmark68Net.loadFromUri('./models'),
     faceapi.nets.faceRecognitionNet.loadFromUri('./models'),
+    faceapi.nets.faceLandmark68Net.loadFromUri('./models'),
     faceapi.nets.faceExpressionNet.loadFromUri('./models')
 ]).then(everythingWorked).catch(somethingFailed);
